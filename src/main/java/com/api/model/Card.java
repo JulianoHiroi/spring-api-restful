@@ -1,15 +1,19 @@
 package com.api.model;
 
+import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
-@Entity
+@Entity(name = "tb_card")
 public class Card {
 
     @Id
@@ -23,8 +27,12 @@ public class Card {
 
     private String language;
 
-    @OneToMany
-    private Phrase phrases;
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL)
+    private List<Phrase> phrases;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private int priority;
 
@@ -60,12 +68,20 @@ public class Card {
         this.language = language;
     }
 
-    public Phrase getPhrases() {
+    public List<Phrase> getPhrases() {
         return phrases;
     }
 
-    public void setPhrases(Phrase phrases) {
+    public void setPhrases(List<Phrase> phrases) {
         this.phrases = phrases;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public int getPriority() {
@@ -75,5 +91,4 @@ public class Card {
     public void setPriority(int priority) {
         this.priority = priority;
     }
-
 }

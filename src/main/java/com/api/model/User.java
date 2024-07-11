@@ -1,15 +1,17 @@
 package com.api.model;
 
+import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 
-@Entity
+@Entity(name = "tb_user")
 public class User {
 
     @Id
@@ -22,8 +24,8 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    @ManyToMany
-    private Card cards;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Card> cards;
 
     public UUID getId() {
         return id;
@@ -49,12 +51,11 @@ public class User {
         this.email = email;
     }
 
-    public Card getCard() {
+    public List<Card> getCards() {
         return cards;
     }
 
-    public void setCard(Card card) {
-        this.cards = card;
+    public void setCards(List<Card> cards) {
+        this.cards = cards;
     }
-
 }
