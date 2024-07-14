@@ -20,11 +20,11 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0' // Substitua pela última versão estável
-    runtimeOnly 'com.h2database:h2'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 }
 
 tasks.named('test') {
@@ -32,6 +32,15 @@ tasks.named('test') {
 }
 
 bootRun {
+    doFirst {
+        file('.env').withInputStream { stream ->
+            Properties properties = new Properties()
+            properties.load(stream)
+            properties.each { key, value ->
+                systemProperties.put(key, value)
+            }
+        }
+    }
     systemProperties = [
         'springdoc.swagger-ui.path': '/swagger-ui.html'
     ]

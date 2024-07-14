@@ -1,10 +1,12 @@
 package com.api.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.api.controller.dto.UserDTO;
 import com.api.model.User;
 import com.api.service.UserService;
 
@@ -19,25 +21,26 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         var users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+        var usersDto = users.stream().map(UserDTO::new).collect(Collectors.toList());
+        return ResponseEntity.ok(usersDto);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> findById(@PathVariable("id") String id) {
+    public ResponseEntity<UserDTO> findById(@PathVariable("id") String id) {
         var user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(new UserDTO(user));
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.createUser(user));
+    public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
+        return ResponseEntity.ok(new UserDTO(userService.createUser(user)));
     }
 
     @PatchMapping
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(user));
+    public ResponseEntity<UserDTO> updateUser(@RequestBody User user) {
+        return ResponseEntity.ok(new UserDTO(userService.updateUser(user)));
     }
 
     @DeleteMapping("/{id}")
