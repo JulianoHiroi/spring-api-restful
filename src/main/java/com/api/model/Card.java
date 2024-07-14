@@ -28,7 +28,7 @@ public class Card {
 
     private String language;
 
-    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Phrase> phrases;
 
     private int priority;
@@ -93,5 +93,11 @@ public class Card {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "Card [id=" + id + ", word=" + word + ", wordTranslated=" + wordTranslated + ", language=" + language
+                + ", phrases=" + phrases + ", priority=" + priority + ", user=" + user + "]";
     }
 }

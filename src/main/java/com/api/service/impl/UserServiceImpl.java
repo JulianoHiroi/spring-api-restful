@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.aspectj.weaver.ast.Not;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 import com.api.model.User;
 import com.api.repository.UserRepository;
@@ -64,7 +62,11 @@ public class UserServiceImpl extends UserService {
                 throw new IllegalArgumentException("Email already used");
             }
         }
-        return userRepository.save(user);
+        userExists.get().setEmail(user.getEmail());
+        if (user.getName() != null) {
+            userExists.get().setName(user.getName());
+        }
+        return userRepository.save(userExists.get());
     }
 
     @Override

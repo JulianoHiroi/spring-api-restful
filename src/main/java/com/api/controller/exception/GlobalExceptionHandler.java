@@ -2,6 +2,7 @@ package com.api.controller.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -49,5 +50,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<String> handleNoContentException() {
         return new ResponseEntity<>("Resource ID not found.", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }

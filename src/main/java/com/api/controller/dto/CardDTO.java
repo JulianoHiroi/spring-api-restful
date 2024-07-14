@@ -23,7 +23,8 @@ public record CardDTO(
                 model.getWord(),
                 model.getWordTranslated(),
                 model.getLanguage(),
-                model.getPhrases().stream().map(PhraseDTO::new).collect(Collectors.toList()),
+                ofNullable(model.getPhrases()).orElse(emptyList()).stream().map(PhraseDTO::new)
+                        .collect(Collectors.toList()),
                 model.getPriority());
     }
 
