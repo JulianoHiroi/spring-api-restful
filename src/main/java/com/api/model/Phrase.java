@@ -7,8 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity(name = "tb_phrase")
 public class Phrase {
@@ -22,9 +20,13 @@ public class Phrase {
 
     private String phraseTranslated;
 
-    @ManyToOne
-    @JoinColumn(name = "card_id", nullable = false)
-    private Card card;
+    public Phrase() {
+    }
+
+    public Phrase(String phrase, String phraseTranslated) {
+        this.phrase = phrase;
+        this.phraseTranslated = phraseTranslated;
+    }
 
     public String getPhraseTranslated() {
         return phraseTranslated;

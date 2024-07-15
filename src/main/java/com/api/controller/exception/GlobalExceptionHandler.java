@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.api.service.exception.BusinessException;
 import com.api.service.exception.NotFoundException;
+import com.api.service.exception.WordNotFound;
 
 import java.util.NoSuchElementException;
 
@@ -55,5 +56,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(WordNotFound.class)
+    public ResponseEntity<String> handleWordNotFoundException(WordNotFound ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 }

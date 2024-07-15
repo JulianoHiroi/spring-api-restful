@@ -28,7 +28,7 @@ public class Card {
 
     private String language;
 
-    @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Phrase> phrases;
 
     private int priority;

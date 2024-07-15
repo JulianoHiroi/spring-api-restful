@@ -2,9 +2,6 @@ package com.api.service.impl;
 
 import java.util.List;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.api.model.Card;
@@ -12,8 +9,13 @@ import com.api.model.User;
 import com.api.repository.CardRepository;
 import com.api.repository.UserRepository;
 import com.api.service.CardService;
+import com.api.service.DictionaryService;
+import com.api.service.TranslateService;
+import com.api.service.dto.DictionaryDTO;
 import com.api.service.exception.NotFoundException;
+import com.api.service.exception.WordNotFound;
 
+import com.api.model.Phrase;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -21,11 +23,16 @@ public class CardServiceImpl extends CardService {
 
     private final CardRepository cardRepository;
     private final UserRepository userRepository;
-    private static final Logger logger = LoggerFactory.getLogger(CardServiceImpl.class);
 
-    public CardServiceImpl(CardRepository cardRepository, UserRepository userRepository) {
+    private final DictionaryService dictionaryService;
+    private final TranslateService translateService;
+
+    public CardServiceImpl(CardRepository cardRepository, UserRepository userRepository,
+            DictionaryService dictionaryService, TranslateService translateService) {
         this.cardRepository = cardRepository;
         this.userRepository = userRepository;
+        this.dictionaryService = dictionaryService;
+        this.translateService = translateService;
     }
 
     public Card createCard(Card card) {
@@ -36,10 +43,22 @@ public class CardServiceImpl extends CardService {
 
         List<Card> CardUsers = this.cardRepository.findByUserId(card.getUser().getId());
         CardUsers.forEach(cardUser -> {
-            if (cardUser.getWord().equals(card.getWord())) {
+            if (cardUser.getWord().equalsIgnoreCase(card.getWord())) {
                 throw new IllegalArgumentException("Card already exists");
             }
         });
+        card.setWord(card.getWord().toLowerCase());
+        DictionaryDTO data = dictionaryService.searchWord(card.getWord());
+        if (data == null)
+            throw new WordNotFound();
+        String translatedWord = translateService.translateToPortugues(card.getWord());
+        List<Phrase> translatedPhrases = data.getExamples().stream().limit(2).map(phrase -> {
+            return new Phrase(phrase, translateService.translateToPortugues(phrase));
+        }).toList();
+        card.setWordTranslated(translatedWord);
+        card.setPhrases(translatedPhrases);
+        card.setPriority(10);
+        card.setLanguage("en");
         return cardRepository.save(card);
     }
 
@@ -72,7 +91,6 @@ public class CardServiceImpl extends CardService {
             });
             cardExist.setWord(card.getWord());
         }
-        logger.info("Card exist: " + cardExist);
         if (card.getWordTranslated() != null)
             cardExist.setWordTranslated(card.getWordTranslated());
         if (card.getPhrases() != null)
@@ -87,7 +105,6 @@ public class CardServiceImpl extends CardService {
     @Transactional
     public void deleteCard(String id) {
         var cardExist = cardRepository.findById(UUID.fromString(id)).orElse(null);
-        logger.info("Card exist: " + cardExist);
         if (cardExist == null) {
             throw new NotFoundException();
         }

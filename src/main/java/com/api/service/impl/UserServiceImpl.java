@@ -36,6 +36,7 @@ public class UserServiceImpl extends UserService {
 
     @Override
     public List<User> getAllUsers() {
+
         return userRepository.findAll();
     }
 

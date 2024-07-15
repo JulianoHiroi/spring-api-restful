@@ -15,4 +15,4 @@ spring:
         format_sql: true
 springdoc:
   swagger-ui:
-    path: /docs
+    path: ${SWAGGER_UI_PATH}
