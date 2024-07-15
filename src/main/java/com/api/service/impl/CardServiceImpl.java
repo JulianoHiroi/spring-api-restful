@@ -2,10 +2,11 @@ package com.api.service.impl;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import com.api.model.Card;
-import com.api.model.User;
 import com.api.repository.CardRepository;
 import com.api.repository.UserRepository;
 import com.api.service.CardService;
@@ -36,30 +37,46 @@ public class CardServiceImpl extends CardService {
     }
 
     public Card createCard(Card card) {
-        User userExist = this.userRepository.findById(card.getUser().getId()).orElse(null);
-        if (userExist == null) {
-            throw new IllegalArgumentException("User not found");
+        // Verifica se o usuário existe
+        userRepository.findById(card.getUser().getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Verifica se o cartão já existe
+        boolean cardExists = cardRepository.findByUserId(card.getUser().getId())
+                .stream()
+                .anyMatch(existingCard -> existingCard.getWord().equalsIgnoreCase(card.getWord()));
+        if (cardExists) {
+            throw new IllegalArgumentException("Card already exists");
         }
 
-        List<Card> CardUsers = this.cardRepository.findByUserId(card.getUser().getId());
-        CardUsers.forEach(cardUser -> {
-            if (cardUser.getWord().equalsIgnoreCase(card.getWord())) {
-                throw new IllegalArgumentException("Card already exists");
-            }
-        });
-        card.setWord(card.getWord().toLowerCase());
-        DictionaryDTO data = dictionaryService.searchWord(card.getWord());
-        if (data == null)
+        // Normaliza a palavra
+        String normalizedWord = card.getWord().toLowerCase();
+        card.setWord(normalizedWord);
+
+        // Busca a palavra no dicionário
+        DictionaryDTO data = dictionaryService.searchWord(normalizedWord);
+        if (data == null) {
             throw new WordNotFound();
-        String translatedWord = translateService.translateToPortugues(card.getWord());
-        List<Phrase> translatedPhrases = data.getExamples().stream().limit(2).map(phrase -> {
-            return new Phrase(phrase, translateService.translateToPortugues(phrase));
-        }).toList();
-        card.setWordTranslated(translatedWord);
-        card.setPhrases(translatedPhrases);
+        }
+
+        // Traduz a palavra e as frases
+        card.setWordTranslated(translateService.translateToPortugues(normalizedWord));
+        card.setPhrases(translatePhrases(data.getExamples()));
+
+        // Define os atributos restantes do cartão
         card.setPriority(10);
         card.setLanguage("en");
+
+        // Salva e retorna o cartão
         return cardRepository.save(card);
+    }
+
+    // Método auxiliar para traduzir as frases
+    private List<Phrase> translatePhrases(List<String> examples) {
+        return examples.stream()
+                .limit(2)
+                .map(phrase -> new Phrase(phrase, translateService.translateToPortugues(phrase)))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

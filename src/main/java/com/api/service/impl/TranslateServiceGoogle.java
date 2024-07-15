@@ -23,14 +23,20 @@ public class TranslateServiceGoogle extends TranslateService {
     }
 
     public String translateToPortugues(String text) {
-        String jsonResponse = webClientBuilder.build()
-                .get()
-                .uri("https://translation.googleapis.com/language/translate/v2?source=en&target=pt&q=" + text + "&key="
-                        + apiKey)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-        return extractTranslatedText(jsonResponse);
+        try {
+            String jsonResponse = webClientBuilder.build()
+                    .get()
+                    .uri("https://translation.googleapis.com/language/translate/v2?source=en&target=pt&q=" + text
+                            + "&key="
+                            + apiKey)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+            return extractTranslatedText(jsonResponse);
+        } catch (Exception e) {
+            throw new RuntimeException("Error in API 'Google Translate'");
+        }
+
     }
 
     private String extractTranslatedText(String jsonResponse) {
